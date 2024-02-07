@@ -15,6 +15,7 @@ void init_audio(){
     fail = Mix_LoadWAV("./res/sound/fail.MP3");
     score_audio = Mix_LoadWAV("./res/sound/score_audio.MP3");
     props = Mix_LoadWAV("./res/sound/props.MP3");
+    puts("Audio Init");
 }
 
 void quit_audio(){
@@ -25,6 +26,7 @@ void quit_audio(){
     Mix_FreeChunk(score_audio);
     Mix_FreeChunk(props);
     Mix_CloseAudio();
+    puts("Audio Quit");
 }
 
 void jump_audio_start(){
