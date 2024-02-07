@@ -1,0 +1,13 @@
+# ninja log v5
+25	389	7289823114134851	src/CMakeFiles/Project.dir/utils/audio.c.obj	5b539bb2d0ff618a
+24	356	7289912121693610	src/CMakeFiles/Project.dir/utils/display.c.obj	efdbdb01b8af3bce
+5	191	7288522194513241	build.ninja	f0df71d9f20a8681
+37	413	7289823114383850	src/CMakeFiles/Project.dir/utils/input.c.obj	21218951c2bc4808
+3	343	7289912121553349	src/CMakeFiles/Project.dir/main.c.obj	38a804fadd8e03d8
+14	344	7289912121573340	src/CMakeFiles/Project.dir/game.c.obj	69682b512e6ab8a7
+3	2424	7288521337470435	src/CMakeFiles/Project.dir/menu.c.obj	415134182e886e12
+356	444	7289912122529150	src/Project.exe	380b2852c3d82e6f
+2	332	7289915944718683	src/CMakeFiles/Project.dir/main.c.obj	38a804fadd8e03d8
+14	354	7289915944935760	src/CMakeFiles/Project.dir/game.c.obj	69682b512e6ab8a7
+25	371	7289915945106818	src/CMakeFiles/Project.dir/utils/display.c.obj	efdbdb01b8af3bce
+371	459	7289915945968851	src/Project.exe	380b2852c3d82e6f
