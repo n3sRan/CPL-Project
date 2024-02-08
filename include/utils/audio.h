@@ -9,7 +9,7 @@ void quit_audio();
 
 void jump_audio_start();
 void jump_audio_continue();
-void jump_audio_end();
+void audio_end();
 
 void success_audio();
 void fail_audio();

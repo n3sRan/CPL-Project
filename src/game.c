@@ -43,7 +43,7 @@ void do_game_logic() {
                 time_counter.begin_time = SDL_GetTicks();
                 time_counter.write_enable = false;
                 if (waiting_counter.write_enable) waiting_counter.write_enable = false;
-                Mix_HaltChannel(-1);
+                audio_end();
                 jump_audio_start();
                 continue;
             }
@@ -52,7 +52,7 @@ void do_game_logic() {
                 continue;
             }
             if ((!time_counter.write_enable) && (!app.keyboard[SDL_SCANCODE_SPACE])) { //计时结束
-                jump_audio_end();
+                audio_end();
                 unsigned int pressed_time = SDL_GetTicks() - time_counter.begin_time;
                 if (pressed_time <= 10) { //防中断
                     time_counter.write_enable = true;
@@ -68,7 +68,7 @@ void do_game_logic() {
                 }
             }
             if (body.perfect && app.keyboard[SDL_SCANCODE_RETURN]) {
-                Mix_HaltChannel(-1);
+                audio_end();
                 double need_time = (platform_next.x - body.x-BODY_W/2.0) / 25.0 * (SPEED_DIVIDE * 1.0);
                 body_jump((int)need_time);
                 body.perfect--;

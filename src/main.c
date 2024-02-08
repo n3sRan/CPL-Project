@@ -1,18 +1,9 @@
 #include "main.h"
 
-/*
- * 未完成:
- * 内存泄漏
- * 美化
- */
-
 App app = {.gaming = 0, .highest = 0};
 
 int main(int argc, char *argv[]) {
     init_app();
-    init_keyboard();
-    init_display();
-    init_audio();
 
     do_menu_logic();
 
@@ -22,9 +13,6 @@ int main(int argc, char *argv[]) {
         if (app.gaming == 0)break;
     }
 
-    quit_audio();
-    quit_display();
-    quit_keyboard();
     quit_app();
     return 0;
 }
@@ -44,9 +32,17 @@ static void init_app() {
         HANDLE_ERROR("Init TTF")
     }
     puts("App Init");
+
+    init_keyboard();
+    init_display();
+    init_audio();
 }
 
 static void quit_app() {
+    quit_audio();
+    quit_display();
+    quit_keyboard();
+
     SDL_Quit();
     IMG_Quit();
     Mix_Quit();
