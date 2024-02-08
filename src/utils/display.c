@@ -13,7 +13,7 @@ TTF_Font *font_default;
 
 //Interface
 void init_display() {
-    app.window = SDL_CreateWindow("Bottle Flip", 100, 100, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
+    app.window = SDL_CreateWindow("Jumper", 100, 100, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
     app.renderer = SDL_CreateRenderer(app.window, -1, SDL_RENDERER_ACCELERATED);
 
     SDL_SetRenderDrawColor(app.renderer, 0xff, 0xff, 0xff, 0xff);
@@ -33,7 +33,7 @@ void quit_display() {
 
 void draw_menu() {
     load_and_draw_img("./res/img/background.jpg", 0, 0);
-    load_and_draw_img("./res/img/title.png", 576, 40);
+    load_and_draw_img("./res/img/title.png", 600, 40);
     load_and_draw_img("./res/img/startup.png", 440, 428);
     SDL_RenderPresent(app.renderer);
 }
@@ -41,9 +41,9 @@ void draw_menu() {
 void draw_game_init() {
     clear_background();
     draw_a_platform(platform_current.x, MIDDLE_Y, platform_current.radius, platform_current.type,
-                    platform_current.isCircle); //current
+                    platform_current.shape); //current
     draw_scores();
-    draw_body();
+    draw_body(0);
     platform_up(); //next platform
 }
 
@@ -60,11 +60,24 @@ void draw_dead_menu() { //文字显示可重整合
 }
 
 //Common Functions
-void draw_body() {
-    load_and_draw_img("./res/img/body1.png",body.x,body.y);
+void draw_body(int status) {
+    switch (status) {
+        case 0:
+            load_and_draw_img("./res/img/body.png",body.x,body.y);
+            return;
+        case 1:
+            load_and_draw_img("./res/img/body_move.png",body.x,body.y);
+            return;
+        case 2:
+            load_and_draw_img("./res/img/body_bonus.png",body.x,body.y);
+            return;
+        default:
+            return;
+    }
+
 }
 
-void draw_a_platform(int x, int y, int radius, int type, bool isCircle) {
+void draw_a_platform(int x, int y, int radius, int type, int shape) {
     SDL_Color platform_color;
     switch (type) {
         case 0:
@@ -77,37 +90,41 @@ void draw_a_platform(int x, int y, int radius, int type, bool isCircle) {
             platform_color = color_green;
             break;
     }
-    if (isCircle) {
-        DrawSolidCircle(app.renderer, x, y, radius, platform_color);
-    } else {
-        DrawSquare(app.renderer, x, y, radius, platform_color);
+    if (shape==CIRCLE) {
+        DrawFilledCircle(app.renderer, x, y, radius, platform_color);
+    } else if(shape==SQUARE) {
+        DrawFilledSquare(app.renderer, x, y, radius, platform_color);
+    } else if(shape==HEXAGON){
+        DrawFilledHexagon(app.renderer,x,y,radius,platform_color);
     }
 }
 
 void keep_platforms() {
     draw_a_platform(platform_current.x, MIDDLE_Y, platform_current.radius, platform_current.type,
-                    platform_current.isCircle);
-    draw_a_platform(platform_next.x, MIDDLE_Y, platform_next.radius, platform_next.type, platform_next.isCircle);
+                    platform_current.shape);
+    draw_a_platform(platform_next.x, MIDDLE_Y, platform_next.radius, platform_next.type, platform_next.shape);
 }
 
 void draw_scores() {
     body.score = body.score < 9999 ? body.score : 9999;
     score_text = malloc(20);
     sprintf(score_text, "SCORE: %d", body.score);
-    load_and_draw_text(score_text, 50, 30, SCORE_FONT_SIZE, color_black);
+    load_and_draw_text(score_text, 30, 20, SCORE_FONT_SIZE, color_black);
     free(score_text);
 
     app.highest = app.highest < 9999 ? app.highest : 9999;
     highest_text = malloc(20);
     sprintf(highest_text, "HIGHEST: %d", app.highest);
-    load_and_draw_text(highest_text, 50, -1, SCORE_FONT_SIZE, color_black);
+    load_and_draw_text(highest_text, 30, -1, SCORE_FONT_SIZE, color_black);
     free(highest_text);
 
     body.perfect = body.perfect < 9999 ? body.perfect : 9999;
     perfect_text = malloc(30);
     sprintf(perfect_text, "PERFECT JUMP [ENTER]: %d", body.perfect);
-    load_and_draw_text(perfect_text,-2,30,PERFECT_FONT_SIZE,color_black);
+    load_and_draw_text(perfect_text,-2,20,PERFECT_FONT_SIZE,color_black);
     free(perfect_text);
+
+    draw_speed(0,false);
 }
 
 void clear_background() {
@@ -121,7 +138,7 @@ void anime_refresh(unsigned int ms) {
     if(ms) SDL_Delay(ms);
 }
 
-void new_frame(int type,int y){
+void new_frame(int type,int y,int status,int delay){
     clear_background();
     switch (type) {
         case MOVE_BODY:
@@ -129,33 +146,45 @@ void new_frame(int type,int y){
             break;
         case PLATFORM_UP:
             draw_a_platform(platform_current.x, MIDDLE_Y, platform_current.radius, platform_current.type,
-                            platform_current.isCircle);
+                            platform_current.shape);
             draw_a_platform(platform_next.x, y, platform_next.radius, platform_next.type,
-                            platform_next.isCircle);
+                            platform_next.shape);
             break;
         case PLATFORM_DOWN:
             draw_a_platform(platform_current.x, y, platform_current.radius, platform_current.type,
-                            platform_current.isCircle);
-            draw_a_platform(platform_next.x, MIDDLE_Y, platform_next.radius, platform_next.type, platform_next.isCircle);
+                            platform_current.shape);
+            draw_a_platform(platform_next.x, MIDDLE_Y, platform_next.radius, platform_next.type, platform_next.shape);
             break;
         case DISPLAY_MOVE:
-            draw_a_platform(platform_current.x, MIDDLE_Y, platform_current.radius, platform_current.type, platform_current.isCircle);
+            draw_a_platform(platform_current.x, MIDDLE_Y, platform_current.radius, platform_current.type, platform_current.shape);
             break;
         default:
             break;
     }
-    draw_body();
+    draw_body(status);
     draw_scores();
-    anime_refresh(REFRESH_TIME);
+    anime_refresh(delay);
+}
+
+void draw_speed(unsigned int temp_time,bool refresh){
+    SDL_SetRenderDrawColor(app.renderer,0x00, 0x00, 0x00, 0x00);
+    SDL_Rect rect_speed_framework = {30, 95, 150, 15};
+    SDL_RenderDrawRect(app.renderer,&rect_speed_framework);
+
+    temp_time = temp_time<=2000?temp_time:2000;
+    double speed_length = temp_time/2000.0*150.0;
+    SDL_Rect rect_speed = {30, 95, (int)speed_length, 15};
+    SDL_RenderFillRect(app.renderer,&rect_speed);
+    if(refresh) anime_refresh(0);
 }
 
 void platform_up() {
     int y = WINDOW_H + platform_next.radius;
     while (y - 20 > MIDDLE_Y) {
         y -= 20;
-        new_frame(PLATFORM_UP,y);
+        new_frame(PLATFORM_UP,y,0,REFRESH_TIME);
     }
-    new_frame(MOVE_BODY,-1);
+    new_frame(MOVE_BODY,-1,0,REFRESH_TIME);
 }
 
 void move_body(unsigned int speed) {
@@ -163,16 +192,16 @@ void move_body(unsigned int speed) {
     for (int i = 0; i < 10; ++i) {
         body.y -= jump_speed;
         body.x += (int) speed;
-        new_frame(MOVE_BODY,-1);
+        new_frame(MOVE_BODY,-1,0,REFRESH_TIME);
     }
     for (int i = 0; i < 5; ++i) {
         body.x += (int) speed;
-        new_frame(MOVE_BODY,-1);
+        new_frame(MOVE_BODY,-1,0,REFRESH_TIME);
     }
     for (int i = 0; i < 10; ++i) {
         body.y += jump_speed;
         body.x += (int) speed;
-        new_frame(MOVE_BODY,-1);
+        new_frame(MOVE_BODY,-1,0,REFRESH_TIME);
     }
 }
 
@@ -180,7 +209,7 @@ void platform_down() {
     int y = MIDDLE_Y;
     while (y-platform_current.radius-20<WINDOW_H){
         y+=20;
-        new_frame(PLATFORM_DOWN,y);
+        new_frame(PLATFORM_DOWN,y,0,REFRESH_TIME);
     }
 }
 
@@ -191,18 +220,19 @@ void display_move() {
     for (int i = 1; i <= times; ++i) {
         body.x -= 20;
         platform_current.x -= 20;
-        new_frame(DISPLAY_MOVE,-1);
+        new_frame(DISPLAY_MOVE,-1,0,REFRESH_TIME);
     }
     body.x = pre_body_x - distance;
     platform_current.x = X_BEGIN;
-    new_frame(DISPLAY_MOVE,-1);
+    new_frame(DISPLAY_MOVE,-1,0,REFRESH_TIME);
 }
 
-void dead_body() {
+void body_dead() {
     for (int i = 0; i < 10; ++i) {
         body.y += 20;
-        new_frame(MOVE_BODY,-1);
+        new_frame(MOVE_BODY,-1,1,DEAD_REFRESH_TIME);
     }
+    anime_refresh(500);
     body_spin();
 }
 
@@ -212,8 +242,8 @@ void body_spin() {
     clear_background();
     keep_platforms();
     draw_scores();
-    load_and_draw_img("./res/img/body2.png",body.x,body.y);
-    anime_refresh(1500);
+    load_and_draw_img("./res/img/body_dead.png",body.x,body.y);
+    anime_refresh(500);
 }
 
 //Basic Functions
@@ -235,13 +265,13 @@ void load_and_draw_text(const char *text, int x, int y, int font_size, SDL_Color
     SDL_QueryTexture(texture_text, NULL, NULL, &rect_text.w, &rect_text.h);
     if (x == -1) rect_text.x = WINDOW_W / 2 - rect_text.w / 2; //Middle
     if (x == -2) rect_text.x = WINDOW_W - rect_text.w - 50; //Right
-    if (y == -1) rect_text.y = 45 + rect_text.h; //Down Next
+    if (y == -1) rect_text.y = 25 + rect_text.h; //Down Next
     SDL_RenderCopy(app.renderer, texture_text, NULL, &rect_text);
     SDL_FreeSurface(surface_text);
     SDL_DestroyTexture(texture_text);
 }
 
-void DrawSolidCircle(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color color) {
+void DrawFilledCircle(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     for (int w = 0; w < radius * 2; w++) {
         for (int h = 0; h < radius * 2; h++) {
@@ -254,8 +284,44 @@ void DrawSolidCircle(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color
     }
 }
 
-void DrawSquare(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color color) {
+void DrawFilledSquare(SDL_Renderer *renderer, int x, int y, int radius, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_Rect FillRect = {x - radius, y - radius, radius * 2, radius * 2};
     SDL_RenderFillRect(renderer, &FillRect);
+}
+
+void DrawFilledHexagon(SDL_Renderer* renderer, int x, int y, int radius, SDL_Color color) {
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    // Calculate
+    int num_vertices = 6;
+    double angle = M_PI / 3;
+    SDL_Point *vertices = malloc(6*sizeof(SDL_Point));
+    for (int i = 0; i < num_vertices; ++i) {
+        vertices[i].x = x + radius * cos(i * angle);
+        vertices[i].y = y + radius * sin(i * angle);
+    }
+    // Lines
+    for (int i = 0; i < num_vertices; ++i) {
+        SDL_RenderDrawLine(renderer, vertices[i].x, vertices[i].y, vertices[(i + 1) % num_vertices].x, vertices[(i + 1) % num_vertices].y);
+    }
+    // Fill
+    int min_x = x - radius;
+    int max_x = x + radius;
+    int min_y = y - radius;
+    int max_y = y + radius;
+    for (int curr_x = min_x; curr_x <= max_x; ++curr_x) {
+        for (int curr_y = min_y; curr_y <= max_y; ++curr_y) {
+            // Check
+            int i, j, c = 0;
+            for (i = 0, j = num_vertices - 1; i < num_vertices; j = i++) {
+                if (((vertices[i].y > curr_y) != (vertices[j].y > curr_y)) &&
+                    (curr_x < (vertices[j].x - vertices[i].x) * (curr_y - vertices[i].y) / (vertices[j].y - vertices[i].y) + vertices[i].x))
+                    c = !c;
+            }
+            if (c) {
+                SDL_RenderDrawPoint(renderer, curr_x, curr_y);
+            }
+        }
+    }
+    free(vertices);
 }

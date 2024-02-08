@@ -5,19 +5,20 @@
 #ifndef PROJECT_GAME_H
 #define PROJECT_GAME_H
 
-#define RADIUS_FLOAT 15
+#define RADIUS_FLOAT 10
 #define RADIUS_DECREASE 15
 #define MAX_LEVEL 10
 #define LEVEL_DIVIDE 4
 #define MAX_SPEED 40
 #define SPEED_DIVIDE 50
-#define MAX_RADIUS 180
+#define MAX_RADIUS 190
+#define MIN_RADIUS 40
 
 #define NORMAL_PLATFORM 0
 #define SCORE_PLATFORM 1
 #define PROPS_PLATFORM 2
 
-#define WAITING_TIME 4000
+#define WAITING_TIME 3000
 
 #include "common.h"
 #include "utils/input.h"

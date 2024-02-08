@@ -16,7 +16,7 @@ void do_menu_logic() {
     while (SDL_WaitEvent(&menu_event)) {
         do_event(menu_event);
         if (app.keyboard[SDL_SCANCODE_ESCAPE]) {
-            app.gaming=0;
+            app.gaming = 0;
             return;
         }
         if (app.keyboard[SDL_SCANCODE_RETURN]) {
@@ -30,28 +30,25 @@ void do_game_logic() {
     do_game_init();
     draw_game_init();
     puts("Playing");
-
     SDL_Event game_event;
     while (1) {
         while (SDL_PollEvent(&game_event)) {
             do_event(game_event);
-            if (app.keyboard[SDL_SCANCODE_ESCAPE]) {
+            if (app.keyboard[SDL_SCANCODE_ESCAPE]) { // 退出
                 app.gaming = 0;
                 return;
             }
-            if (time_counter.write_enable && app.keyboard[SDL_SCANCODE_SPACE]) { //未计时且按下跳跃键
+            if (time_counter.write_enable && app.keyboard[SDL_SCANCODE_SPACE]) { // 未计时且按下跳跃键
                 time_counter.begin_time = SDL_GetTicks();
                 time_counter.write_enable = false;
                 if (waiting_counter.write_enable) waiting_counter.write_enable = false;
+                if (body.score) new_frame(MOVE_BODY, -1, 0, 0);
                 audio_end();
                 jump_audio_start();
+                draw_speed(SDL_GetTicks()-time_counter.begin_time,true);
                 continue;
             }
-            if ((!time_counter.write_enable) && app.keyboard[SDL_SCANCODE_SPACE]) { //计时中
-                if (Mix_Playing(-1) == 0) jump_audio_continue();
-                continue;
-            }
-            if ((!time_counter.write_enable) && (!app.keyboard[SDL_SCANCODE_SPACE])) { //计时结束
+            if ((!time_counter.write_enable) && (!app.keyboard[SDL_SCANCODE_SPACE])) { // 计时结束
                 audio_end();
                 unsigned int pressed_time = SDL_GetTicks() - time_counter.begin_time;
                 if (pressed_time <= 10) { //防中断
@@ -61,21 +58,29 @@ void do_game_logic() {
                 body_jump(pressed_time);
                 alive_judge();
                 time_counter.write_enable = true;
-                //printf("pressed_time = %d, body.x = %d, body.alive = %d score = %d\n", pressed_time, body.x, body.alive,body.score);
                 if (body.alive == 0) {
                     app.gaming = 2;
                     return; //转到死亡界面
                 }
             }
-            if (body.perfect && app.keyboard[SDL_SCANCODE_RETURN]) {
-                audio_end();
-                double need_time = (platform_next.x - body.x-BODY_W/2.0) / 25.0 * (SPEED_DIVIDE * 1.0);
-                body_jump((int)need_time);
+
+            if (body.perfect && app.keyboard[SDL_SCANCODE_RETURN]) { // 使用道具
                 body.perfect--;
+                audio_end();
+                if (body.score) new_frame(MOVE_BODY, -1, 0, 0);
+                if (waiting_counter.write_enable) waiting_counter.write_enable = false;
+                double need_time = (platform_next.x - body.x - BODY_W / 2.0) / 25.0 * (SPEED_DIVIDE * 1.0);
+                body_jump((int) need_time);
                 alive_judge();
+                app.keyboard[SDL_SCANCODE_RETURN] = true;
             }
         }
         bonus_check();
+        if ((!time_counter.write_enable) && app.keyboard[SDL_SCANCODE_SPACE]) { // 计时中
+            draw_speed(SDL_GetTicks()-time_counter.begin_time,true);
+            if (Mix_Playing(-1) == 0) jump_audio_continue();
+            continue;
+        }
         SDL_Delay(2);
     }
 }
@@ -83,7 +88,7 @@ void do_game_logic() {
 void do_dead_logic() {
     SDL_Delay(100);
     fail_audio();
-    dead_body();
+    body_dead();
     draw_dead_menu();
     puts("Dead");
     SDL_Event dead_event;
@@ -111,7 +116,7 @@ void do_game_init() {
     platform_current.x = X_BEGIN;
     platform_current.radius = MAX_RADIUS;
     platform_current.type = NORMAL_PLATFORM;
-    platform_current.isCircle = false;
+    platform_current.shape = 2;
 
     create_next_platform();
 }
@@ -124,6 +129,8 @@ void create_next_platform() {
     } else {
         platform_next.radius = MAX_RADIUS - level * RADIUS_DECREASE - random_number(RADIUS_FLOAT);
     }
+    platform_next.radius = platform_next.radius<=MAX_RADIUS?platform_next.radius:MAX_RADIUS;
+    platform_next.radius = platform_next.radius>=MIN_RADIUS?platform_next.radius:MIN_RADIUS;
 
     if (random_number(10) == 9) {
         platform_next.type = SCORE_PLATFORM;
@@ -133,11 +140,12 @@ void create_next_platform() {
         platform_next.type = NORMAL_PLATFORM;
     }
 
-    platform_next.x = X_BEGIN + platform_current.radius + platform_next.radius + MIN_DISTANCE + random_number(MAX_DISTANCE);
+    platform_next.x =
+            X_BEGIN + platform_current.radius + platform_next.radius + MIN_DISTANCE + random_number(MAX_DISTANCE);
     if (platform_next.x + platform_next.radius >= WINDOW_W) {
         platform_next.x = WINDOW_W - platform_next.radius - 50;
     }
-    platform_next.isCircle = random_number(2);
+    platform_next.shape = random_number(3);
 }
 
 void body_jump(unsigned int pressed_time) {
@@ -148,7 +156,8 @@ void body_jump(unsigned int pressed_time) {
 void alive_judge() {
     if (body.x + BODY_W / 2 < platform_current.x + platform_current.radius) { //still in current platform
         body.alive = 1;
-    } else if ((body.x + BODY_W / 2 > platform_next.x - platform_next.radius) && (body.x + BODY_W / 2 < platform_next.x + platform_next.radius)) { //in next platform
+    } else if ((body.x + BODY_W / 2 > platform_next.x - platform_next.radius) &&
+               (body.x + BODY_W / 2 < platform_next.x + platform_next.radius)) { //in next platform
         body.alive = 2;
         body.score++;
         highest_check();
@@ -182,11 +191,7 @@ void bonus_check() {
             props_audio();
             body.perfect++;
         }
-        clear_background();
-        keep_platforms();
-        draw_body();
-        draw_scores();
-        anime_refresh(0);
+        new_frame(MOVE_BODY, -1, 2, 0);
         waiting_counter.write_enable = false; //not waiting
     }
 }
@@ -195,7 +200,7 @@ void copy_platform() {
     platform_current.x = platform_next.x;
     platform_current.radius = platform_next.radius;
     platform_current.type = platform_next.type;
-    platform_current.isCircle = platform_next.isCircle;
+    platform_current.shape = platform_next.shape;
 }
 
 int random_number(int range) {

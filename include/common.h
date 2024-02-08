@@ -13,6 +13,7 @@
 #include "stdio.h"
 #include "stdbool.h"
 #include "stdlib.h"
+#include "math.h"
 
 #define HANDLE_ERROR(msg) printf(msg ": %s\n",SDL_GetError()); \
     exit(EXIT_FAILURE);
@@ -23,6 +24,10 @@
 
 #define MIN_DISTANCE 100
 #define MAX_DISTANCE 300
+
+#define SQUARE 0
+#define CIRCLE 1
+#define HEXAGON 2
 
 typedef struct {
     SDL_Window *window;
@@ -46,7 +51,7 @@ typedef struct {
     int x;
     int radius;
     int type; // {0, 1, 2}
-    bool isCircle;
+    int shape;
 }Platform;
 
 extern App app;
