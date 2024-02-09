@@ -214,6 +214,15 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
+Jumper_BINARY_DIR:STATIC=C:/Users/n3sRa/OneDrive - smail.nju.edu.cn/Study/C_Promgramming_Lauguage/Code/Project/cmake-build-debug
+
+//Value Computed by CMake
+Jumper_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+Jumper_SOURCE_DIR:STATIC=C:/Users/n3sRa/OneDrive - smail.nju.edu.cn/Study/C_Promgramming_Lauguage/Code/Project
+
+//Value Computed by CMake
 Project_BINARY_DIR:STATIC=C:/Users/n3sRa/OneDrive - smail.nju.edu.cn/Study/C_Promgramming_Lauguage/Code/Project/cmake-build-debug
 
 //Value Computed by CMake

@@ -42,6 +42,8 @@ void do_game_init();
 
 void body_jump(unsigned int pressed_time);
 
+void perfect_jump();
+
 void create_next_platform();
 
 void alive_judge();

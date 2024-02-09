@@ -8,6 +8,7 @@ Body body;
 Platform platform_current;
 Platform platform_next;
 
+
 void do_menu_logic() {
     draw_menu();
     puts("Menu");
@@ -67,13 +68,9 @@ void do_game_logic() {
             if (body.perfect && app.keyboard[SDL_SCANCODE_RETURN]) { // 使用道具
                 body.perfect--;
                 audio_end();
-                if (body.score) new_frame(MOVE_BODY, -1, 0, 0);
-                if (waiting_counter.write_enable) waiting_counter.write_enable = false;
-                double need_time = (platform_next.x - body.x - BODY_W / 2.0) / 25.0 * (SPEED_DIVIDE * 1.0);
-                body_jump((int) need_time);
-                alive_judge();
-                app.keyboard[SDL_SCANCODE_RETURN] = true;
+                perfect_jump();
             }
+
         }
         bonus_check();
         if ((!time_counter.write_enable) && app.keyboard[SDL_SCANCODE_SPACE]) { // 计时中
@@ -153,6 +150,15 @@ void body_jump(unsigned int pressed_time) {
     move_body(speed);
 }
 
+void perfect_jump(){
+    audio_end();
+    if (body.score) new_frame(MOVE_BODY, -1, 0, 0);
+    if (waiting_counter.write_enable) waiting_counter.write_enable = false;
+    double need_time = (platform_next.x - body.x - BODY_W / 2.0) / 25.0 * (SPEED_DIVIDE * 1.0);
+    body_jump((int) need_time);
+    alive_judge();
+}
+
 void alive_judge() {
     if (body.x + BODY_W / 2 < platform_current.x + platform_current.radius) { //still in current platform
         body.alive = 1;
@@ -191,7 +197,7 @@ void bonus_check() {
             props_audio();
             body.perfect++;
         }
-        new_frame(MOVE_BODY, -1, 2, 0);
+        new_frame(MOVE_BODY_BONUS, -1, 2, 0);
         waiting_counter.write_enable = false; //not waiting
     }
 }

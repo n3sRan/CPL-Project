@@ -39,13 +39,13 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 12,
+				"line" : 11,
 				"parent" : 2
 			},
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 9,
+				"line" : 8,
 				"parent" : 2
 			}
 		]

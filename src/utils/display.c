@@ -144,6 +144,10 @@ void new_frame(int type,int y,int status,int delay){
         case MOVE_BODY:
             keep_platforms();
             break;
+        case MOVE_BODY_BONUS:
+            keep_platforms();
+            load_and_draw_img("./res/img/bonus.png",210,25);
+            break;
         case PLATFORM_UP:
             draw_a_platform(platform_current.x, MIDDLE_Y, platform_current.radius, platform_current.type,
                             platform_current.shape);

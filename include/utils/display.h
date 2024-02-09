@@ -20,6 +20,7 @@
 #define PLATFORM_UP 1
 #define PLATFORM_DOWN 2
 #define DISPLAY_MOVE 3
+#define MOVE_BODY_BONUS 4
 
 void init_display();
 void quit_display();
