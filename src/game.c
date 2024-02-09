@@ -8,6 +8,7 @@ Body body;
 Platform platform_current;
 Platform platform_next;
 
+bool still = true;
 
 void do_menu_logic() {
     draw_menu();
@@ -31,6 +32,7 @@ void do_game_logic() {
     do_game_init();
     draw_game_init();
     puts("Playing");
+    still=true;
     SDL_Event game_event;
     while (1) {
         while (SDL_PollEvent(&game_event)) {
@@ -40,6 +42,7 @@ void do_game_logic() {
                 return;
             }
             if (time_counter.write_enable && app.keyboard[SDL_SCANCODE_SPACE]) { // 未计时且按下跳跃键
+                still = false;
                 time_counter.begin_time = SDL_GetTicks();
                 time_counter.write_enable = false;
                 if (waiting_counter.write_enable) waiting_counter.write_enable = false;
@@ -66,6 +69,7 @@ void do_game_logic() {
             }
 
             if (body.perfect && app.keyboard[SDL_SCANCODE_RETURN]) { // 使用道具
+                still = false;
                 body.perfect--;
                 audio_end();
                 perfect_jump();
@@ -78,7 +82,10 @@ void do_game_logic() {
             if (Mix_Playing(-1) == 0) jump_audio_continue();
             continue;
         }
-        SDL_Delay(2);
+        if(still){
+            new_frame(MOVE_BODY,-1,0,0);
+        }
+        SDL_Delay(5);
     }
 }
 
@@ -184,10 +191,13 @@ void next_step() {
     display_move();
     create_next_platform();
     platform_up();
+    printf("Score: %d, Highest: %d, Props: %d, Body.x: %d, Next.x: %d.\n",body.score,app.highest,body.perfect,body.x,platform_next.x);
+    still = true;
 }
 
 void bonus_check() {
     if (waiting_counter.write_enable && SDL_GetTicks() - waiting_counter.begin_time >= WAITING_TIME) {
+        still = false;
         if (platform_current.type == SCORE_PLATFORM) {
             extra_score_audio();
             body.score += 20;
@@ -198,6 +208,7 @@ void bonus_check() {
             body.perfect++;
         }
         new_frame(MOVE_BODY_BONUS, -1, 2, 0);
+        printf("Score: %d, Highest: %d, Props: %d, Body.x: %d, Next.x: %d.\n",body.score,app.highest,body.perfect,body.x,platform_next.x);
         waiting_counter.write_enable = false; //not waiting
     }
 }
