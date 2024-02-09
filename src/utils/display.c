@@ -74,7 +74,6 @@ void draw_body(int status) {
         default:
             return;
     }
-
 }
 
 void draw_a_platform(int x, int y, int radius, int type, int shape) {
