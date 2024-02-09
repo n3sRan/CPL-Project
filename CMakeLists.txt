@@ -6,7 +6,13 @@ set(CMAKE_C_STANDARD 17)
 #add_compile_definitions(AUDIO_OFF)
 
 include_directories(include)
-add_subdirectory(src)
+add_executable(Project
+        main.c
+        game.c
+        utils/display.c
+        utils/audio.c
+        utils/input.c
+)
 
 target_link_libraries(Project PRIVATE
         mingw32
